@@ -1,13 +1,21 @@
 'use client'
 import { useState } from "react";
-import { Button } from "@heroui/react";
 import Link from 'next/link';
+import { signOut, useSession } from "@/lib/auth-client";
+import { Button } from "@heroui/react";
 
 
 
 
 export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { data: session } = useSession();
+
+  const handleSignOut = async () => {
+    const { data, error } = await signOut();
+  }
+
+
 
   const link = <>
     <li>
@@ -16,25 +24,41 @@ export default function NavBar() {
     <li>
       <Link href="#">Blog</Link>
     </li>
-    <li>
-      <Link href="/dashboard" className="font-semibold text-accent" aria-current="page">
-        Dashboard
-      </Link>
-    </li>
+    {
+      session?.user ? <>
+        <li>
+          <Link href="/profile" className="">
+            Profile
+          </Link>
+        </li>
+        <li>
+          <Link href="/dashboard" className="font-semibold text-accent" aria-current="page">
+            Dashboard
+          </Link>
+        </li>
+      </> : <></>
+    }
   </>
 
   const Logo = <>
-    <Link href='/'><p className="font-bold text-2xl text-[#f98901]">LifeOS <sup className="text-black font-light -top-4 -left-1 italic font-serif text-[10px]">Abdur Rahman</sup></p></Link>
+    <Link href='/'><p className="font-bold text-2xl text-[#f98901]"><span className="text-[#ccff00fd]">Life</span>OS <sup className="text-white font-light -top-4 -left-1 italic font-serif text-[10px]">{session?.user ? `${session?.user?.name}`:'LifeOS'}</sup></p></Link>
   </>
-  
-  
-  
+
+
+
 
   const authLink = <>
-    {<><Link href="/sign-in">Sign in</Link>
-      <Link href='/sign-up' className='btn'>Sign Up</Link> </>}
+    {session?.user ?
+      <><span>{session?.user?.name}</span><Button
+        onClick={handleSignOut}
+      >Sign Out</Button>
+      </> : <><Link href="/sign-in">Sign in</Link>
+        <Link href='/sign-up' className='border border-[#e7e7e789] rounded-md px-4 py-1.5 bg-[#01013284]'>Sign Up</Link> </>
+    }
+
   </>
 
+  console.log(session?.user?.email);
   return (
     <nav className="sticky top-0 z-40 w-full border-b border-separator bg-background/70 backdrop-blur-lg">
       <header className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
